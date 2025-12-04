@@ -207,7 +207,7 @@
     let games: Game[] = [];
     let loading: boolean = true;
     let error: string | null = null;
-    let selectedView: 'grid' | 'list' | 'featured' = 'grid';
+    let selectedView: 'grid' | 'list' = 'grid';
 
     // Simula il caricamento dei giochi
     async function fetchGames() {
@@ -258,12 +258,6 @@
                                 class="px-4 py-2 rounded-md transition-all {selectedView === 'list' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}"
                         >
                             List
-                        </button>
-                        <button
-                                on:click={() => selectedView = 'featured'}
-                                class="px-4 py-2 rounded-md transition-all {selectedView === 'featured' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}"
-                        >
-                            Featured
                         </button>
                     </div>
 
@@ -467,83 +461,6 @@
                             </div>
                         </div>
                     {/each}
-                </div>
-            {/if}
-
-            <!-- Featured View -->
-            {#if selectedView === 'featured'}
-                <div class="space-y-8">
-                    <!-- Hero Game -->
-                    {#if games[0]}
-                        <div class="relative h-96 rounded-2xl overflow-hidden group cursor-pointer">
-                            <img
-                                    src={games[0].background_image}
-                                    alt={games[0].name}
-                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
-                                <div class="absolute bottom-0 left-0 right-0 p-8">
-                                    <span class="inline-block px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-semibold mb-3">IN EVIDENZA</span>
-                                    <h2 class="text-4xl font-bold text-white mb-3">{games[0].name}</h2>
-                                    <div class="flex items-center gap-6 text-white mb-4">
-                                        <span class="text-xl">⭐ {formatRating(games[0].rating)}</span>
-                                        <span>{games[0].released}</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        {#each games[0].genres || [] as genre}
-                                            <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm">{genre.name}</span>
-                                        {/each}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {/if}
-
-                    <!-- Other Featured Games -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {#each games.slice(1, 5) as game}
-                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer">
-                                <div class="aspect-video overflow-hidden bg-slate-900">
-                                    <img
-                                            src={game.background_image}
-                                            alt={game.name}
-                                            class="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div class="p-5">
-                                    <h3 class="text-white font-bold text-xl mb-3">{game.name}</h3>
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-purple-400 text-lg">⭐ {formatRating(game.rating)}</span>
-                                        <span class="text-gray-400">{game.released}</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        {#each game.genres?.slice(0, 3) || [] as genre}
-                                            <span class="px-3 py-1 bg-purple-600/30 text-purple-300 rounded-full text-xs">{genre.name}</span>
-                                        {/each}
-                                    </div>
-                                </div>
-                            </div>
-                        {/each}
-                    </div>
-
-                    <!-- More Games Grid -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {#each games.slice(5) as game}
-                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-lg overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer">
-                                <div class="aspect-square overflow-hidden bg-slate-900">
-                                    <img
-                                            src={game.background_image}
-                                            alt={game.name}
-                                            class="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div class="p-3">
-                                    <h4 class="text-white font-semibold text-sm line-clamp-1">{game.name}</h4>
-                                    <span class="text-purple-400 text-xs">⭐ {formatRating(game.rating)}</span>
-                                </div>
-                            </div>
-                        {/each}
-                    </div>
                 </div>
             {/if}
         {/if}
