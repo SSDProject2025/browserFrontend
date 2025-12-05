@@ -207,7 +207,6 @@
     let games: Game[] = [];
     let loading: boolean = true;
     let error: string | null = null;
-    let selectedView: 'grid' | 'list' | 'featured' = 'grid';
 
     // Simula il caricamento dei giochi
     async function fetchGames() {
@@ -232,334 +231,230 @@
     }
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-    <!-- Header -->
-    <header class="bg-black/30 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-10">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-4xl font-bold text-white mb-2">
-                        🎮 <span class="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">GameFeed</span>
-                    </h1>
-                    <p class="text-purple-300">Discover the best video games</p>
-                </div>
+<!-- Header -->
+<header class="bg-black/30 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold text-white mb-2">
+                    🎮 <span class="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">GameFeed</span>
+                </h1>
+                <p class="text-purple-300">Discover the best video games</p>
+            </div>
 
-                <div class="flex items-center gap-4">
-                    <!-- View Selector -->
-                    <div class="flex gap-2 bg-slate-800/50 rounded-lg p-1">
+            <div class="flex items-center gap-4">
+                <!-- Auth Buttons / User Menu -->
+                {#if !isLoggedIn}
+                    <!-- Login/Signup Button -->
+                    <a
+                            href="/auth"
+                            class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-purple-500/30"
+                    >
+                        Sign In
+                    </a>
+                {:else}
+                    <!-- User Menu -->
+                    <div class="relative user-menu-container">
                         <button
-                                on:click={() => selectedView = 'grid'}
-                                class="px-4 py-2 rounded-md transition-all {selectedView === 'grid' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}"
+                                on:click={toggleUserMenu}
+                                class="flex items-center gap-3 px-4 py-2 bg-slate-800/50 hover:bg-slate-800/70 border border-purple-500/30 hover:border-purple-500/50 rounded-lg transition-all"
                         >
-                            Grid
-                        </button>
-                        <button
-                                on:click={() => selectedView = 'list'}
-                                class="px-4 py-2 rounded-md transition-all {selectedView === 'list' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}"
-                        >
-                            List
-                        </button>
-                        <button
-                                on:click={() => selectedView = 'featured'}
-                                class="px-4 py-2 rounded-md transition-all {selectedView === 'featured' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}"
-                        >
-                            Featured
-                        </button>
-                    </div>
-
-                    <!-- Auth Buttons / User Menu -->
-                    {#if !isLoggedIn}
-                        <!-- Login/Signup Button -->
-                        <a
-                                href="/auth"
-                                class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-purple-500/30"
-                        >
-                            Sign In
-                        </a>
-                    {:else}
-                        <!-- User Menu -->
-                        <div class="relative user-menu-container">
-                            <button
-                                    on:click={toggleUserMenu}
-                                    class="flex items-center gap-3 px-4 py-2 bg-slate-800/50 hover:bg-slate-800/70 border border-purple-500/30 hover:border-purple-500/50 rounded-lg transition-all"
+                            <img
+                                    src={mockUser.avatar}
+                                    alt={mockUser.username}
+                                    class="w-8 h-8 rounded-full ring-2 ring-purple-500/50"
+                            />
+                            <span class="text-white font-medium hidden sm:block">{mockUser.username}</span>
+                            <svg
+                                    class="w-4 h-4 text-gray-400 transition-transform {showUserMenu ? 'rotate-180' : ''}"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                             >
-                                <img
-                                        src={mockUser.avatar}
-                                        alt={mockUser.username}
-                                        class="w-8 h-8 rounded-full ring-2 ring-purple-500/50"
-                                />
-                                <span class="text-white font-medium hidden sm:block">{mockUser.username}</span>
-                                <svg
-                                        class="w-4 h-4 text-gray-400 transition-transform {showUserMenu ? 'rotate-180' : ''}"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
 
-                            <!-- Dropdown Menu -->
-                            {#if showUserMenu}
-                                <div class="absolute right-0 mt-2 w-64 bg-slate-800/95 backdrop-blur-xl border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 overflow-hidden animate-slideDown">
-                                    <!-- User Info -->
-                                    <div class="p-4 border-b border-purple-500/20 bg-black/20">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <img
-                                                    src={mockUser.avatar}
-                                                    alt={mockUser.username}
-                                                    class="w-12 h-12 rounded-full ring-2 ring-purple-500/50"
-                                            />
-                                            <div>
-                                                <p class="text-white font-semibold">{mockUser.username}</p>
-                                                <p class="text-gray-400 text-sm">{mockUser.email}</p>
-                                            </div>
+                        <!-- Dropdown Menu -->
+                        {#if showUserMenu}
+                            <div class="absolute right-0 mt-2 w-64 bg-slate-800/95 backdrop-blur-xl border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 overflow-hidden animate-slideDown">
+                                <!-- User Info -->
+                                <div class="p-4 border-b border-purple-500/20 bg-black/20">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <img
+                                                src={mockUser.avatar}
+                                                alt={mockUser.username}
+                                                class="w-12 h-12 rounded-full ring-2 ring-purple-500/50"
+                                        />
+                                        <div>
+                                            <p class="text-white font-semibold">{mockUser.username}</p>
+                                            <p class="text-gray-400 text-sm">{mockUser.email}</p>
                                         </div>
                                     </div>
-
-                                    <!-- Menu Items -->
-                                    <div class="py-2">
-                                        <a
-                                                href="/profile"
-                                                class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                            <span>My Profile</span>
-                                        </a>
-
-                                        <a
-                                                href="/library"
-                                                class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                            </svg>
-                                            <span>My Library</span>
-                                        </a>
-
-                                        <a
-                                                href="/favorites"
-                                                class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                            </svg>
-                                            <span>Favorites</span>
-                                        </a>
-
-                                        <a
-                                                href="/settings"
-                                                class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            <span>Settings</span>
-                                        </a>
-                                    </div>
-
-                                    <!-- Logout -->
-                                    <div class="border-t border-purple-500/20 py-2">
-                                        <button
-                                                on:click={handleLogout}
-                                                class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-600/20 hover:text-red-300 transition-colors"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                            </svg>
-                                            <span>Logout</span>
-                                        </button>
-                                    </div>
                                 </div>
-                            {/if}
-                        </div>
-                    {/if}
 
-                    <!-- Toggle Login State Button (for testing only) -->
-                    <button
-                            on:click={toggleLogin}
-                            class="px-4 py-2 bg-yellow-600/20 border border-yellow-500/50 hover:bg-yellow-600/30 text-yellow-400 rounded-lg text-sm transition-all"
-                            title="Toggle login state (testing only)"
-                    >
-                        🔄 Test: {isLoggedIn ? 'Logout' : 'Login'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+                                <!-- Menu Items -->
+                                <div class="py-2">
+                                    <a
+                                            href="/profile"
+                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span>My Profile</span>
+                                    </a>
 
-    <main class="container mx-auto px-4 py-8">
-        {#if loading}
-            <div class="flex items-center justify-center h-64">
-                <div class="text-center">
-                    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500 mx-auto mb-4"></div>
-                    <p class="text-purple-300 text-lg">Caricamento giochi...</p>
-                </div>
-            </div>
-        {:else if error}
-            <div class="bg-red-500/10 border border-red-500 rounded-lg p-6 text-center">
-                <p class="text-red-400 text-lg">{error}</p>
-                <button on:click={fetchGames} class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
-                    Riprova
+                                    <a
+                                            href="/profile/my-library"
+                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        </svg>
+                                        <span>My Library</span>
+                                    </a>
+
+                                    <a
+                                            href="/favorites"
+                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                        <span>Favorites</span>
+                                    </a>
+
+                                    <a
+                                            href="/settings"
+                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span>Settings</span>
+                                    </a>
+                                </div>
+
+                                <!-- Logout -->
+                                <div class="border-t border-purple-500/20 py-2">
+                                    <button
+                                            on:click={handleLogout}
+                                            class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-600/20 hover:text-red-300 transition-colors"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
+
+                <!-- Toggle Login State Button (for testing only) -->
+                <button
+                        on:click={toggleLogin}
+                        class="px-4 py-2 bg-yellow-600/20 border border-yellow-500/50 hover:bg-yellow-600/30 text-yellow-400 rounded-lg text-sm transition-all"
+                        title="Toggle login state (testing only)"
+                >
+                    🔄 Test: {isLoggedIn ? 'Logout' : 'Login'}
                 </button>
             </div>
-        {:else}
-            <!-- Grid View -->
-            {#if selectedView === 'grid'}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {#each games as game}
-                        <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer">
-                            <div class="aspect-video overflow-hidden bg-slate-900">
-                                <img
-                                        src={game.background_image}
-                                        alt={game.name}
-                                        class="w-full h-full object-cover"
-                                />
+        </div>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-8">
+    {#if loading}
+        <div class="flex items-center justify-center h-64">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500 mx-auto mb-4"></div>
+                <p class="text-purple-300 text-lg">Caricamento giochi...</p>
+            </div>
+        </div>
+    {:else if error}
+        <div class="bg-red-500/10 border border-red-500 rounded-lg p-6 text-center">
+            <p class="text-red-400 text-lg">{error}</p>
+            <button on:click={fetchGames} class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition">
+                Riprova
+            </button>
+        </div>
+    {:else}
+        <div class="space-y-8">
+            <!-- Hero Game -->
+            {#if games[0]}
+                <div class="relative h-96 rounded-2xl overflow-hidden group cursor-pointer">
+                    <img
+                            src={games[0].background_image}
+                            alt={games[0].name}
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
+                        <div class="absolute bottom-0 left-0 right-0 p-8">
+                            <span class="inline-block px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-semibold mb-3">IN EVIDENZA</span>
+                            <h2 class="text-4xl font-bold text-white mb-3">{games[0].name}</h2>
+                            <div class="flex items-center gap-6 text-white mb-4">
+                                <span class="text-xl">⭐ {formatRating(games[0].rating)}</span>
+                                <span>{games[0].released}</span>
                             </div>
-                            <div class="p-4">
-                                <h3 class="text-white font-bold text-lg mb-2 line-clamp-1">{game.name}</h3>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-purple-400">⭐ {formatRating(game.rating)}</span>
-                                    <span class="text-gray-400">{new Date(game.released).getFullYear()}</span>
-                                </div>
-                                <div class="mt-3 flex flex-wrap gap-1">
-                                    {#each game.genres?.slice(0, 2) || [] as genre}
-                                        <span class="px-2 py-1 bg-purple-600/30 text-purple-300 rounded text-xs">{genre.name}</span>
-                                    {/each}
-                                </div>
+                            <div class="flex flex-wrap gap-2">
+                                {#each games[0].genres || [] as genre}
+                                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm">{genre.name}</span>
+                                {/each}
                             </div>
                         </div>
-                    {/each}
+                    </div>
                 </div>
             {/if}
 
-            <!-- List View -->
-            {#if selectedView === 'list'}
-                <div class="space-y-4">
-                    {#each games as game}
-                        <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all hover:shadow-lg hover:shadow-purple-500/10 cursor-pointer overflow-hidden">
-                            <div class="flex">
-                                <div class="w-48 h-32 flex-shrink-0 bg-slate-900">
-                                    <img
-                                            src={game.background_image}
-                                            alt={game.name}
-                                            class="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div class="flex-1 p-4 flex flex-col justify-between">
-                                    <div>
-                                        <h3 class="text-white font-bold text-xl mb-2">{game.name}</h3>
-                                        <div class="flex flex-wrap gap-2 mb-2">
-                                            {#each game.genres || [] as genre}
-                                                <span class="px-2 py-1 bg-purple-600/30 text-purple-300 rounded-full text-xs">{genre.name}</span>
-                                            {/each}
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 text-sm">
-                                        <span class="text-purple-400 font-semibold">⭐ {formatRating(game.rating)}</span>
-                                        <span class="text-gray-400">📅 {game.released}</span>
-                                        <span class="text-gray-400">🎯 {game.playtime}h gameplay</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {/each}
-                </div>
-            {/if}
-
-            <!-- Featured View -->
-            {#if selectedView === 'featured'}
-                <div class="space-y-8">
-                    <!-- Hero Game -->
-                    {#if games[0]}
-                        <div class="relative h-96 rounded-2xl overflow-hidden group cursor-pointer">
+            <!-- Other Featured Games -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {#each games.slice(1, 5) as game}
+                    <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer">
+                        <div class="aspect-video overflow-hidden bg-slate-900">
                             <img
-                                    src={games[0].background_image}
-                                    alt={games[0].name}
-                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                    src={game.background_image}
+                                    alt={game.name}
+                                    class="w-full h-full object-cover"
                             />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
-                                <div class="absolute bottom-0 left-0 right-0 p-8">
-                                    <span class="inline-block px-3 py-1 bg-purple-600 text-white rounded-full text-sm font-semibold mb-3">IN EVIDENZA</span>
-                                    <h2 class="text-4xl font-bold text-white mb-3">{games[0].name}</h2>
-                                    <div class="flex items-center gap-6 text-white mb-4">
-                                        <span class="text-xl">⭐ {formatRating(games[0].rating)}</span>
-                                        <span>{games[0].released}</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        {#each games[0].genres || [] as genre}
-                                            <span class="px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm">{genre.name}</span>
-                                        {/each}
-                                    </div>
-                                </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-white font-bold text-xl mb-3">{game.name}</h3>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-purple-400 text-lg">⭐ {formatRating(game.rating)}</span>
+                                <span class="text-gray-400">{game.released}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                {#each game.genres?.slice(0, 3) || [] as genre}
+                                    <span class="px-3 py-1 bg-purple-600/30 text-purple-300 rounded-full text-xs">{genre.name}</span>
+                                {/each}
                             </div>
                         </div>
-                    {/if}
-
-                    <!-- Other Featured Games -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {#each games.slice(1, 5) as game}
-                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer">
-                                <div class="aspect-video overflow-hidden bg-slate-900">
-                                    <img
-                                            src={game.background_image}
-                                            alt={game.name}
-                                            class="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div class="p-5">
-                                    <h3 class="text-white font-bold text-xl mb-3">{game.name}</h3>
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-purple-400 text-lg">⭐ {formatRating(game.rating)}</span>
-                                        <span class="text-gray-400">{game.released}</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        {#each game.genres?.slice(0, 3) || [] as genre}
-                                            <span class="px-3 py-1 bg-purple-600/30 text-purple-300 rounded-full text-xs">{genre.name}</span>
-                                        {/each}
-                                    </div>
-                                </div>
-                            </div>
-                        {/each}
                     </div>
+                {/each}
+            </div>
 
-                    <!-- More Games Grid -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {#each games.slice(5) as game}
-                            <div class="bg-slate-800/50 backdrop-blur-sm rounded-lg overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer">
-                                <div class="aspect-square overflow-hidden bg-slate-900">
-                                    <img
-                                            src={game.background_image}
-                                            alt={game.name}
-                                            class="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div class="p-3">
-                                    <h4 class="text-white font-semibold text-sm line-clamp-1">{game.name}</h4>
-                                    <span class="text-purple-400 text-xs">⭐ {formatRating(game.rating)}</span>
-                                </div>
-                            </div>
-                        {/each}
+            <!-- More Games Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {#each games.slice(5) as game}
+                    <div class="bg-slate-800/50 backdrop-blur-sm rounded-lg overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer">
+                        <div class="aspect-square overflow-hidden bg-slate-900">
+                            <img
+                                    src={game.background_image}
+                                    alt={game.name}
+                                    class="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div class="p-3">
+                            <h4 class="text-white font-semibold text-sm line-clamp-1">{game.name}</h4>
+                            <span class="text-purple-400 text-xs">⭐ {formatRating(game.rating)}</span>
+                        </div>
                     </div>
-                </div>
-            {/if}
-        {/if}
-    </main>
-</div>
-
-<style>
-    :global(body) {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-
-    .line-clamp-1 {
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-</style>
+                {/each}
+            </div>
+        </div>
+    {/if}
+</main>
