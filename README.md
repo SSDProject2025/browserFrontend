@@ -58,9 +58,7 @@ Here is the current navigation structure of the application:
 * **`/`** - Homepage: feed (Public)
 * **`/auth`** - Login and registration (Public)
 * **`/profile`** - User profile (🔒 Authentication required)
-    * **`/collections/to-play`** - Collection of games to play
-    * **`/collections/played`** - Collection of played games
-
+* **`/profile/collection`** - To play/played user games (🔒 Authentication required)
 ---
 
 ## 🧪 Working with Mock Data
