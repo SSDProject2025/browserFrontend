@@ -28,6 +28,17 @@ Follow these instructions to get a copy of the project up and running on your lo
 * [Node.js](https://nodejs.org/en/) (Version 18+ recommended)
 * npm
 
+### ⚙️ Configuration (.env)
+
+To run the project locally, you need to configure the environment variables to connect the frontend with the backend.
+
+Create a file named `.env` in the root directory of the project and add the following configuration:
+
+```bash
+# Base URL for the Backend API (Django)
+PUBLIC_API_SERVER_BASE_URL=
+```
+
 ### Installation
 
 1.  **Clone the repository**
