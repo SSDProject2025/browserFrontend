@@ -1,5 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { authService } from "$lib/services/auth";
+    import type {LoginUserRequest, RegisterUserRequest} from "$lib/types/api.types";
+    import {goto} from "$app/navigation";
 
     let isLogin = true; // true = login, false = registrazione
     let loading = false;
@@ -143,6 +146,50 @@
         }
         particles = particles;
     });
+
+    function submit() {
+        loading = true;
+
+        if(isLogin) {
+            const loginUserRequest: LoginUserRequest = {
+                username: "",
+                email: email,
+                password: password,
+            };
+
+            authService.login(loginUserRequest).then(() => {
+                errorMessage = ""
+                successMessage = 'Login successful!';
+                setTimeout(() => {
+                    loading = false;
+                    goto('/');
+                }, 2000);
+            }).catch((error: any) => {
+                loading = false;
+                errorMessage = error.message;
+            });
+        } else {
+            const registerUserRequest: RegisterUserRequest = {
+                username: username,
+                email: email,
+                password1: password,
+                password2: confirmPassword,
+            }
+
+            authService.register(registerUserRequest).then(() => {
+                errorMessage = ""
+                successMessage = 'Registration successful!';
+                setTimeout(() => {
+                    loading = false;
+                    goto('/');
+                }, 2000);
+            }).catch((error: any) => {
+                loading = false;
+                console.log(error.message);
+                errorMessage = error.message;
+            });
+        }
+    }
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
@@ -304,6 +351,7 @@
 
                 <!-- Submit Button -->
                 <button
+                        on:click={submit}
                         type="submit"
                         disabled={loading}
                         class="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2"

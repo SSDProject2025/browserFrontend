@@ -1,5 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import {authService} from "$lib/services/auth";
+    import {goto} from "$app/navigation";
 
     interface Genre {
         id: number;
@@ -229,6 +231,14 @@
     function formatRating(rating: number | undefined): string {
         return rating ? rating.toFixed(1) : 'N/A';
     }
+
+    function logout(){
+        authService.logout().then(() => {
+            toggleLogin()
+        }).catch((error: any) => {
+
+        });
+    }
 </script>
 
 <!-- Header -->
@@ -340,7 +350,7 @@
                                 <!-- Logout -->
                                 <div class="border-t border-purple-500/20 py-2">
                                     <button
-                                            on:click={handleLogout}
+                                            on:click={logout}
                                             class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-600/20 hover:text-red-300 transition-colors"
                                     >
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
