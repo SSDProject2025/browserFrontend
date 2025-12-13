@@ -152,7 +152,6 @@
 
         if(isLogin) {
             const loginUserRequest: LoginUserRequest = {
-                username: "",
                 email: email,
                 password: password,
             };
@@ -165,6 +164,7 @@
                     goto('/');
                 }, 2000);
             }).catch((error: any) => {
+                password = ""
                 loading = false;
                 errorMessage = error.message;
             });
