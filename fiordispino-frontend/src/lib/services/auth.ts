@@ -18,7 +18,8 @@ export class AuthService {
             const tokenResponse = response as TokenResponse;
             this.authTokenHandler.setToken(tokenResponse.key);
         }).catch(error => {
-            this.handleLoginError(error);
+            throw new AxiosError(Object.values(error.response.data).flat().join('\n'));
+            //this.handleLoginError(error);
         });
     }
 
@@ -41,7 +42,7 @@ export class AuthService {
             }).catch(error => {
                 throw error;
             }).finally(() => {
-                localStorage.removeItem("token");
+                this.authTokenHandler.removeToken()
             });
         }
     }
