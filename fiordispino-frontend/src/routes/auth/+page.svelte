@@ -172,7 +172,7 @@
             const registerUserRequest: RegisterUserRequest = {
                 username: username,
                 email: email,
-                password1: password,
+                password: password,
                 password2: confirmPassword,
             }
 

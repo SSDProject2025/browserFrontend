@@ -1,7 +1,7 @@
 export interface RegisterUserRequest {
     username: string;
     email: string;
-    password1: string;
+    password: string;
     password2: string;
 }
 
