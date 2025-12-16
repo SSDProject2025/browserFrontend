@@ -20,18 +20,24 @@ export interface User {
     id: number;
     is_superuser: boolean;
 }
+
 export interface Game {
+    id: number;
+    owner: number;
+    game: GameDetails;
+    created_at: string; // ISO date string
+}
+
+export interface GameDetails {
     id: number;
     box_art: string;
     description: string;
     title: string;
-    genres: Genre[];
+    genres: number[];
     pegi: number;
-    "release_date": string;
-}
-
-export interface Genre {
-    id: number;
+    release_date: string;
+    global_rating: string;
+    rating_count: number;
 }
 
 export interface GenreInfo {
