@@ -14,20 +14,21 @@ export interface LoginUserRequest {
     password: string;
 }
 
-export interface User {
-    username: string;
-    email: string;
+export interface Genre {
     id: number;
-    is_superuser: boolean;
+    name: string;
 }
+
 export interface Game {
     id: number;
     box_art: string;
-    description: string;
-    title: string;
+    description: string
     genres: Genre[];
+    global_rating: number;
     pegi: number;
-    "release_date": string;
+    rating_count: number;
+    release_date: Date;
+    title: string;
 }
 
 export interface Genre {
@@ -37,4 +38,11 @@ export interface Genre {
 export interface GenreInfo {
     id: number;
     name: string;
+}
+
+export interface User {
+    username: string;
+    email: string;
+    id: number;
+    is_superuser: boolean;
 }
