@@ -1,6 +1,6 @@
 import { ApiClient } from "./api"
 import { AuthTokenHandler } from "$lib/services/authTokenHandler";
-import type {LoginUserRequest, RegisterUserRequest, TokenResponse} from "$lib/types/api.types";
+import type {Game, LoginUserRequest, RegisterUserRequest, TokenResponse, User} from "$lib/types/api.types";
 import {AxiosError} from "axios";
 
 export class AuthService {
@@ -53,7 +53,7 @@ export class AuthService {
             console.log("No Token Found");
             return;
         } else {
-            return this.apiClient.post("/api/auth/logout/").then(response => {
+            return this.apiClient.post("/auth/logout/").then(response => {
                 console.log(response);
             }).catch(error => {
                 throw error;
@@ -75,7 +75,9 @@ export class AuthService {
             console.log("No Token Found");
             return;
         } else {
-            return this.apiClient.get("/auth/me/").then().catch(error => {
+            return this.apiClient.get("/user/me/").then(response => {
+                return response as User;
+            }).catch(error => {
                 console.log(error);
             })
         }
