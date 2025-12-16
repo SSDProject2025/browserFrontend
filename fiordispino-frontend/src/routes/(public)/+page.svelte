@@ -2,19 +2,39 @@
     import {authService} from "$lib/services/auth";
     import { invalidateAll } from '$app/navigation';
     import { onMount } from "svelte";
+    import type {Game, GenreInfo, User} from "$lib/types/api.types";
+    import {libraryService} from "$lib/services/library";
+    import {gameService} from "$lib/services/game";
 
     let { data } = $props();
     let games = $derived(data.games);
     let error = $derived(data.error);
 
-    const mockUser = {
+    const user = {
         username: "GamerPro",
         email: "gamer@example.com",
         avatar: "https://ui-avatars.com/api/?name=Gamer+Pro&background=9333ea&color=fff&size=128"
     };
 
-    let user: { username: string; email: string; avatar: string } | null = mockUser; //$state(authService.getCurrentUser());
-    let isLoggedIn = $derived(!!user);
+    let isLoggedIn = $state(false);
+    let loading = true;
+    let userObject: User;
+
+    onMount(async () => {
+        try {
+            userObject = await authService.getUser();
+            user.username = userObject.username;
+            user.email = userObject.email;
+            user.avatar = "https://ui-avatars.com/api/?name=" + userObject.username + "&background=9333ea&color=fff&size=256";
+            isLoggedIn = true
+        } catch (err) {
+            isLoggedIn = false
+        } finally {
+            loading = false;
+        }
+    });
+
+
     let showUserMenu = $state(false);
     let isRetrying = $state(false);
 
@@ -30,9 +50,11 @@
 
     async function handleLogout() {
         await authService.logout();
-        user = null;
         showUserMenu = false;
-        window.location.reload();
+        isLoggedIn = false;
+        user.username = "";
+        user.email = "";
+        user.avatar = "";
     }
 
     function handleClickOutside(event: MouseEvent) {
@@ -83,11 +105,11 @@
                                 class="flex items-center gap-3 px-4 py-2 bg-slate-800/50 hover:bg-slate-800/70 border border-purple-500/30 hover:border-purple-500/50 rounded-lg transition-all"
                         >
                             <img
-                                    src={mockUser.avatar}
-                                    alt={mockUser.username}
+                                    src={user.avatar}
+                                    alt={user.username}
                                     class="w-8 h-8 rounded-full ring-2 ring-purple-500/50"
                             />
-                            <span class="text-white font-medium hidden sm:block">{mockUser.username}</span>
+                            <span class="text-white font-medium hidden sm:block">{user.username}</span>
                             <svg
                                     class="w-4 h-4 text-gray-400 transition-transform {showUserMenu ? 'rotate-180' : ''}"
                                     fill="none"
@@ -105,13 +127,13 @@
                                 <div class="p-4 border-b border-purple-500/20 bg-black/20">
                                     <div class="flex items-center gap-3 mb-2">
                                         <img
-                                                src={mockUser.avatar}
-                                                alt={mockUser.username}
+                                                src={user.avatar}
+                                                alt={user.username}
                                                 class="w-12 h-12 rounded-full ring-2 ring-purple-500/50"
                                         />
                                         <div>
-                                            <p class="text-white font-semibold">{mockUser.username}</p>
-                                            <p class="text-gray-400 text-sm">{mockUser.email}</p>
+                                            <p class="text-white font-semibold">{user.username}</p>
+                                            <p class="text-gray-400 text-sm">{user.email}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -136,27 +158,6 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                         </svg>
                                         <span>My Library</span>
-                                    </a>
-
-                                    <a
-                                            href="/favorites"
-                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                        <span>Favorites</span>
-                                    </a>
-
-                                    <a
-                                            href="/settings"
-                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <span>Settings</span>
                                     </a>
                                 </div>
 
@@ -186,43 +187,43 @@
         <div class="bg-red-500/10 border border-red-500 rounded-lg p-6 text-center">
             <p class="text-red-400 text-lg">{error}</p>
             <button
-                onclick={handleRetry}
-                disabled={isRetrying}
-                class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition"
+                    onclick={handleRetry}
+                    disabled={isRetrying}
+                    class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition"
             >
                 {isRetrying ? 'Retrying...' : 'Retry'}
             </button>
         </div>
     {:else if games.length > 0}
-    <div class="space-y-8">
-        {#if games[0]}
-            <div class="relative h-96 rounded-2xl overflow-hidden group cursor-pointer">
-                <!-- todo placeholder -->
-                <img src="data:image/jpg;base64,{games[0].box_art}" alt={games[0].title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
-                <div class="absolute bottom-0 left-0 right-0 p-8">
-                    <h2 class="text-4xl font-bold text-white mb-3">{games[0].title}</h2>
+        <div class="space-y-8">
+            {#if games[0]}
+                <div class="relative h-96 rounded-2xl overflow-hidden group cursor-pointer">
+                    <!-- todo placeholder -->
+                    <img src="data:image/jpg;base64,{games[0].box_art}" alt={games[0].title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
+                        <div class="absolute bottom-0 left-0 right-0 p-8">
+                            <h2 class="text-4xl font-bold text-white mb-3">{games[0].title}</h2>
+                        </div>
                     </div>
-             </div>
+                </div>
+            {/if}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {#each games.slice(1, 5) as game}
+                    <div class="bg-slate-800/50 p-5 rounded">
+                        <h3 class="text-white">{game.title}</h3>
+                    </div>
+                {/each}
             </div>
-        {/if}
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {#each games.slice(1, 5) as game}
-               <div class="bg-slate-800/50 p-5 rounded">
-                   <h3 class="text-white">{game.title}</h3>
-               </div>
-            {/each}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {#each games.slice(5) as game}
+                    <div class="bg-slate-800/50 p-3 rounded">
+                        <h4 class="text-white">{game.title}</h4>
+                    </div>
+                {/each}
+            </div>
         </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-             {#each games.slice(5) as game}
-                <div class="bg-slate-800/50 p-3 rounded">
-                    <h4 class="text-white">{game.title}</h4>
-                 </div>
-            {/each}
-        </div>
-    </div>
     {:else}
         <div class="text-center text-white py-10">
             <p class="text-xl">No game found!</p>
