@@ -1,5 +1,5 @@
 import { ApiClient } from "./api"
-import type {Genre, GenreInfo} from "$lib/types/api.types";
+import type { GenreInfo } from "$lib/types/api.types";
 import {AxiosError} from "axios";
 
 export class GameService {
