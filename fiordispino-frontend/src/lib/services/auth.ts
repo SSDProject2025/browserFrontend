@@ -14,9 +14,17 @@ export class AuthService {
     }
 
     async login(loginUserRequest: LoginUserRequest): Promise<any> {
-        return this.apiClient.post("/auth/login/", loginUserRequest).then(response => {
+        return this.apiClient.post("/auth/login/", loginUserRequest).then(async response => {
             const tokenResponse = response as TokenResponse;
             this.authTokenHandler.setToken(tokenResponse.key);
+            await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'login',
+                    token: tokenResponse.key
+                })
+            });
         }).catch(error => {
             throw new AxiosError(Object.values(error.response.data).flat().join('\n'));
             //this.handleLoginError(error);
@@ -24,9 +32,17 @@ export class AuthService {
     }
 
     async register(registerUserRequest: RegisterUserRequest): Promise<any> {
-        return this.apiClient.post("/auth/registration/", registerUserRequest).then(response  => {
+        return this.apiClient.post("/auth/registration/", registerUserRequest).then(async response  => {
             const tokenResponse = response as TokenResponse;
             this.authTokenHandler.setToken(tokenResponse.key);
+            await fetch('/api/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'login',
+                    token: tokenResponse.key
+                })
+            });
         }).catch(error => {
             throw new AxiosError(Object.values(error.response.data).flat().join('\n'));
         });
@@ -37,13 +53,31 @@ export class AuthService {
             console.log("No Token Found");
             return;
         } else {
-            return this.apiClient.post("/auth/logout/").then(response => {
+            return this.apiClient.post("/api/auth/logout/").then(response => {
                 console.log(response);
             }).catch(error => {
                 throw error;
-            }).finally(() => {
+            }).finally(async () => {
                 this.authTokenHandler.removeToken()
+                await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'logout'
+                    })
+                });
             });
+        }
+    }
+
+    async getUser(): Promise<any> {
+        if(this.authTokenHandler.getToken() == null){
+            console.log("No Token Found");
+            return;
+        } else {
+            return this.apiClient.get("/auth/me/").then().catch(error => {
+                console.log(error);
+            })
         }
     }
 
