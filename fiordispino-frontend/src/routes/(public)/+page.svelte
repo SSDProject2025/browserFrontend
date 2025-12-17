@@ -1,41 +1,39 @@
 <script lang="ts">
     import {authService} from "$lib/services/auth";
-    import { invalidateAll } from '$app/navigation';
-    import { onMount } from "svelte";
-    import type {Game, GenreInfo, User} from "$lib/types/api.types";
-    import {libraryService} from "$lib/services/library";
+    import {invalidateAll} from '$app/navigation';
+    import {onMount} from "svelte";
+    import type {GameDetails, GenreInfo, User} from "$lib/types/api.types";
     import {gameService} from "$lib/services/game";
+    import Header from "$lib/components/header.svelte";
 
-    let { data } = $props();
-    let games = $derived(data.games);
-    let error = $derived(data.error);
-
-    const user = {
-        username: "GamerPro",
-        email: "gamer@example.com",
-        avatar: "https://ui-avatars.com/api/?name=Gamer+Pro&background=9333ea&color=fff&size=128"
-    };
-
-    let isLoggedIn = $state(false);
-    let loading = true;
-    let userObject: User;
+    let games = $state<GameDetails[]>([]);
+    let genres = $state<GenreInfo[]>([]);
+    let genreMap = $state<Record<number, string>>({});
+    let error = $state(false);
+    let loading = $state(true);
 
     onMount(async () => {
         try {
-            userObject = await authService.getUser();
-            user.username = userObject.username;
-            user.email = userObject.email;
-            user.avatar = "https://ui-avatars.com/api/?name=" + userObject.username + "&background=9333ea&color=fff&size=256";
-            isLoggedIn = true
+            games = await gameService.getAll();
         } catch (err) {
-            isLoggedIn = false
+            loading = false;
+            error = true;
+        }
+
+        try {
+            genres = await gameService.getGenres().catch(() => []);
+            genreMap = {};
+            for (const g of genres) {
+                genreMap[g.id] = g.name;
+            }
+        } catch (err) {
+            loading = false;
+            error = true;
         } finally {
             loading = false;
         }
     });
 
-
-    let showUserMenu = $state(false);
     let isRetrying = $state(false);
 
     async function handleRetry() {
@@ -44,189 +42,188 @@
         isRetrying = false;
     }
 
-    function toggleUserMenu() {
-        showUserMenu = !showUserMenu;
-    }
-
-    async function handleLogout() {
-        await authService.logout();
-        showUserMenu = false;
-        isLoggedIn = false;
-        user.username = "";
-        user.email = "";
-        user.avatar = "";
-    }
-
-    function handleClickOutside(event: MouseEvent) {
-        const target = event.target as HTMLElement;
-        if (!target.closest('.user-menu-container')) {
-            showUserMenu = false;
-        }
-    }
-
-    onMount(() => {
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    });
-
     function formatRating(rating: number | undefined): string {
         return rating ? rating.toFixed(1) : 'N/A';
     }
 </script>
 
-<!-- Header -->
-<header class="bg-black/30 backdrop-blur-md border-b border-purple-500/20 sticky top-0 z-10">
-    <div class="container mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-4xl font-bold text-white mb-2">
-                    <span class="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">GameFeed</span>
-                </h1>
-                <p class="text-purple-300">Discover the best video games</p>
+<Header/>
+
+<main class="container mx-auto px-4 py-8">
+    {#if loading}
+        <div class="flex items-center justify-center h-64">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500 mx-auto mb-4"></div>
+                <p class="text-purple-300 text-lg">Loading library...</p>
             </div>
+        </div>
+    {:else }
+        {#if error}
+            <div class="bg-red-500/10 border border-red-500 rounded-lg p-6 text-center">
+                <p class="text-red-400 text-lg">Error loading games</p>
+                <button
+                        onclick={handleRetry}
+                        disabled={isRetrying}
+                        class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition"
+                >
+                    {isRetrying ? 'Retrying...' : 'Retry'}
+                </button>
+            </div>
+        {:else if games.length > 0}
+            <div class="space-y-8">
+                <!-- Featured Game (Hero) -->
+                {#if games[0]}
+                    <a href="/{games[0].id}" class="relative block h-96 rounded-2xl overflow-hidden group cursor-pointer">
+                        <img
+                                src="data:image/jpg;base64,{games[0].box_art}"
+                                alt={games[0].title}
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
+                            <div class="absolute bottom-0 left-0 right-0 p-8">
+                                <div class="flex items-end justify-between gap-4">
+                                    <div class="flex-1">
+                                        <h2 class="text-4xl font-bold text-white mb-3 leading-tight">
+                                            {games[0].title}
+                                        </h2>
+                                        <p class="text-gray-300 text-sm line-clamp-2 mb-3 max-w-3xl">
+                                            {games[0].description}
+                                        </p>
+                                        <div class="flex flex-wrap items-center gap-3">
+                                            <!-- Rating -->
+                                            {#if games[0].global_rating && parseFloat(games[0].global_rating) > 0}
+                                                <div class="flex items-center gap-1 bg-yellow-500/20 px-3 py-1 rounded-full">
+                                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                    <span class="text-yellow-400 font-semibold">{formatRating(parseFloat(games[0].global_rating))}</span>
+                                                    <span class="text-gray-400 text-xs">({games[0].rating_count})</span>
+                                                </div>
+                                            {/if}
 
-            <div class="flex items-center gap-4">
-                <!-- Auth Buttons / User Menu -->
-                {#if !isLoggedIn}
-                    <!-- Login/Signup Button -->
-                    <a
-                            href="/auth"
-                            class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-purple-500/30"
-                    >
-                        Sign In
-                    </a>
-                {:else}
-                    <!-- User Menu -->
-                    <div class="relative user-menu-container">
-                        <button
-                                onclick={toggleUserMenu}
-                                class="flex items-center gap-3 px-4 py-2 bg-slate-800/50 hover:bg-slate-800/70 border border-purple-500/30 hover:border-purple-500/50 rounded-lg transition-all"
-                        >
-                            <img
-                                    src={user.avatar}
-                                    alt={user.username}
-                                    class="w-8 h-8 rounded-full ring-2 ring-purple-500/50"
-                            />
-                            <span class="text-white font-medium hidden sm:block">{user.username}</span>
-                            <svg
-                                    class="w-4 h-4 text-gray-400 transition-transform {showUserMenu ? 'rotate-180' : ''}"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                            >
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                                            <!-- Genres -->
+                                            <div class="flex gap-2">
+                                                {#each games[0].genres.slice(0, 3) as genreId}
+                                                    {#if genreMap[genreId]}
+                                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-medium">
+                                                            {genreMap[genreId]}
+                                                        </span>
+                                                    {/if}
+                                                {/each}
+                                            </div>
 
-                        <!-- Dropdown Menu -->
-                        {#if showUserMenu}
-                            <div class="absolute right-0 mt-2 w-64 bg-slate-800/95 backdrop-blur-xl border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 overflow-hidden animate-slideDown">
-                                <!-- User Info -->
-                                <div class="p-4 border-b border-purple-500/20 bg-black/20">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <img
-                                                src={user.avatar}
-                                                alt={user.username}
-                                                class="w-12 h-12 rounded-full ring-2 ring-purple-500/50"
-                                        />
-                                        <div>
-                                            <p class="text-white font-semibold">{user.username}</p>
-                                            <p class="text-gray-400 text-sm">{user.email}</p>
+                                            <!-- PEGI -->
+                                            <span class="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-xs font-bold">
+                                                PEGI {games[0].pegi}
+                                            </span>
+
+                                            <!-- Release Date -->
+                                            <span class="text-gray-400 text-sm">
+                                                {new Date(games[0].release_date).getFullYear()}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </a>
+                {/if}
 
-                                <!-- Menu Items -->
-                                <div class="py-2">
-                                    <a
-                                            href="/profile"
-                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                        <span>My Profile</span>
-                                    </a>
+                <!-- Medium Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {#each games.slice(1, 5) as game}
+                        <a href="/{game.id}" class="relative block h-96 rounded-2xl overflow-hidden group cursor-pointer">
+                            <img
+                                    src="data:image/jpg;base64,{game.box_art}"
+                                    alt={game.title}
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
+                                <div class="absolute bottom-0 left-0 right-0 p-6">
+                                    <h3 class="text-2xl font-bold text-white mb-2 leading-tight">
+                                        {game.title}
+                                    </h3>
+                                    <p class="text-gray-300 text-sm line-clamp-2 mb-3">
+                                        {game.description}
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <!-- Rating -->
+                                        {#if game.global_rating && parseFloat(game.global_rating) > 0}
+                                            <div class="flex items-center gap-1 bg-yellow-500/20 px-2 py-1 rounded-full">
+                                                <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                <span class="text-yellow-400 font-semibold text-sm">{formatRating(parseFloat(game.global_rating))}</span>
+                                            </div>
+                                        {/if}
 
-                                    <a
-                                            href="/profile/my-library"
-                                            class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-purple-600/20 hover:text-white transition-colors"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                        </svg>
-                                        <span>My Library</span>
-                                    </a>
-                                </div>
+                                        <!-- Genres -->
+                                        {#each game.genres.slice(0, 2) as genreId}
+                                            {#if genreMap[genreId]}
+                                                <span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full text-xs">
+                                                    {genreMap[genreId]}
+                                                </span>
+                                            {/if}
+                                        {/each}
 
-                                <!-- Logout -->
-                                <div class="border-t border-purple-500/20 py-2">
-                                    <button
-                                            onclick={handleLogout}
-                                            class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-600/20 hover:text-red-300 transition-colors"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        <span>Logout</span>
-                                    </button>
+                                        <!-- PEGI -->
+                                        <span class="bg-red-500/20 text-red-300 px-2 py-1 rounded-full text-xs font-bold">
+                                            {game.pegi}+
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        {/if}
-                    </div>
-                {/if}
-            </div>
-        </div>
-    </div>
-</header>
-
-<main class="container mx-auto px-4 py-8">
-    {#if error}
-        <div class="bg-red-500/10 border border-red-500 rounded-lg p-6 text-center">
-            <p class="text-red-400 text-lg">{error}</p>
-            <button
-                    onclick={handleRetry}
-                    disabled={isRetrying}
-                    class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg transition"
-            >
-                {isRetrying ? 'Retrying...' : 'Retry'}
-            </button>
-        </div>
-    {:else if games.length > 0}
-        <div class="space-y-8">
-            {#if games[0]}
-                <div class="relative h-96 rounded-2xl overflow-hidden group cursor-pointer">
-                    <!-- todo placeholder -->
-                    <img src="data:image/jpg;base64,{games[0].box_art}" alt={games[0].title} class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
-                        <div class="absolute bottom-0 left-0 right-0 p-8">
-                            <h2 class="text-4xl font-bold text-white mb-3">{games[0].title}</h2>
-                        </div>
-                    </div>
+                        </a>
+                    {/each}
                 </div>
-            {/if}
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {#each games.slice(1, 5) as game}
-                    <div class="bg-slate-800/50 p-5 rounded">
-                        <h3 class="text-white">{game.title}</h3>
-                    </div>
-                {/each}
-            </div>
+                <!-- Small Cards Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {#each games.slice(5) as game}
+                        <a href="/{game.id}" class="relative block h-80 rounded-xl overflow-hidden group cursor-pointer">
+                            <img
+                                    src="data:image/jpg;base64,{game.box_art}"
+                                    alt={game.title}
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent">
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                    <h4 class="text-lg font-bold text-white mb-2 leading-tight line-clamp-2">
+                                        {game.title}
+                                    </h4>
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <!-- Rating -->
+                                        {#if game.global_rating && parseFloat(game.global_rating) > 0}
+                                            <div class="flex items-center gap-1 bg-yellow-500/20 px-2 py-0.5 rounded-full">
+                                                <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                <span class="text-yellow-400 font-semibold text-xs">{formatRating(parseFloat(game.global_rating))}</span>
+                                            </div>
+                                        {/if}
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {#each games.slice(5) as game}
-                    <div class="bg-slate-800/50 p-3 rounded">
-                        <h4 class="text-white">{game.title}</h4>
-                    </div>
-                {/each}
+                                        <!-- First Genre -->
+                                        {#if game.genres[0] && genreMap[game.genres[0]]}
+                                            <span class="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full text-xs">
+                                                {genreMap[game.genres[0]]}
+                                            </span>
+                                        {/if}
+
+                                        <!-- PEGI -->
+                                        <span class="bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full text-xs font-bold">
+                                            {game.pegi}+
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {/each}
+                </div>
             </div>
-        </div>
-    {:else}
-        <div class="text-center text-white py-10">
-            <p class="text-xl">No game found!</p>
-        </div>
+        {:else}
+            <div class="text-center text-white py-10">
+                <p class="text-xl">No game found!</p>
+            </div>
+        {/if}
     {/if}
 </main>

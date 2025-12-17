@@ -205,7 +205,7 @@
 
     <!-- Fixed Logo/Header at top -->
     <div class="absolute top-8 left-8 z-10">
-        <a href="/static" class="flex items-center gap-2 text-white hover:text-purple-400 transition-colors">
+        <a href="/" class="flex items-center gap-2 text-white hover:text-purple-400 transition-colors">
             <span class="text-3xl">🎮</span>
             <span class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
         GameFeed

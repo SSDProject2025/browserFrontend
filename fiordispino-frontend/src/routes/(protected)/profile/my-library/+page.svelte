@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { libraryService } from "$lib/services/library";
-    import type {Game, Genre, GenreInfo} from "$lib/types/api.types";
+    import type {Game, GenreInfo} from "$lib/types/api.types";
     import { authService } from "$lib/services/auth";
     import {gameService} from "$lib/services/game";
 
