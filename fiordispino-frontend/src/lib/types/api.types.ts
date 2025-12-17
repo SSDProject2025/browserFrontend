@@ -4,11 +4,6 @@ export interface RegisterUserRequest {
     password: string;
     password2: string;
 }
-
-export interface TokenResponse {
-    key: string;
-}
-
 export interface LoginUserRequest {
     email: string;
     password: string;
@@ -24,7 +19,7 @@ export interface Game {
     box_art: string;
     description: string
     genres: Genre[];
-    global_rating: number;
+    global_rating: string;
     pegi: number;
     rating_count: number;
     release_date: Date;
@@ -33,6 +28,7 @@ export interface Game {
 
 export interface Genre {
     id: number;
+    name: string;
 }
 
 export interface GenreInfo {
@@ -43,6 +39,12 @@ export interface GenreInfo {
 export interface User {
     username: string;
     email: string;
-    id: number;
+    pk: number;
     is_superuser: boolean;
+}
+export interface GamePlayed {
+    id: number;
+    owner: number;
+    game: Game;
+    rating: number;
 }

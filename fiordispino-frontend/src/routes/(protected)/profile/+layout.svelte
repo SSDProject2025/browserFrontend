@@ -11,6 +11,6 @@
 </svelte:head>
 
 <!-- Header -->
-<Navbar />
+<!-- <Navbar /> -->
 
 {@render children()}
