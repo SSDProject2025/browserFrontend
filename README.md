@@ -1,10 +1,6 @@
 # browserFrontend
 A frontend web application for managing video game collections, built with **SvelteKit**.
 
-> ⚠️ **Development Note**
->
-> The backend for this application is not yet implemented. This codebase currently uses **mock data** to test the User Interface (UI) and navigation flows. All data displayed is simulated and changes will not persist.
-
 ## ✨ Features
 
 * **Feed:** Discover new games on the homepage.
