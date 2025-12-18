@@ -188,52 +188,53 @@
                                                 </div>
                                             </div>
 
-                                        <!-- Game Info -->
-                                        <div class="p-4 space-y-3">
-                                            <div>
-                                                <h3 class="text-white font-bold text-base line-clamp-2 mb-1 min-h-[3rem]">
-                                                    {game.game.title}
-                                                </h3>
-                                                <p class="text-gray-400 text-xs">
-                                                    {formatDate(game.game.release_date)}
-                                                </p>
-                                            </div>
+                                            <!-- Game Info -->
+                                            <div class="p-4 space-y-3">
+                                                <div>
+                                                    <h3 class="text-white font-bold text-base line-clamp-2 mb-1 min-h-[3rem]">
+                                                        {game.game.title}
+                                                    </h3>
+                                                    <p class="text-gray-400 text-xs">
+                                                        {formatDate(game.game.release_date)}
+                                                    </p>
+                                                </div>
 
-                                            <!-- Genres -->
-                                            <div class="flex flex-wrap gap-1">
-                                                {#each (game.game.genres ?? []).slice(0, 3) as genre}
-                                                    <span class="px-2 py-1 bg-purple-600/30 text-purple-300 rounded text-xs font-medium">
-                                                        {typeof genre === 'object' ? genre.name : genre}
-                                                    </span>
-                                                {/each}
+                                                <!-- Genres -->
+                                                <div class="flex flex-wrap gap-1">
+                                                    {#each (game.game.genres ?? []).slice(0, 3) as genre}
+                                                        <span class="px-2 py-1 bg-purple-600/30 text-purple-300 rounded text-xs font-medium">
+                                                            {typeof genre === 'object' ? genre.name : genre}
+                                                        </span>
+                                                    {/each}
 
-                                                {#if (game.game.genres?.length ?? 0) > 3}
-                                                    <span class="px-2 py-1 bg-purple-600/20 text-purple-400 rounded text-xs">
-                                                        +{(game.game.genres?.length ?? 0) - 3}
-                                                    </span>
+                                                    {#if (game.game.genres?.length ?? 0) > 3}
+                                                        <span class="px-2 py-1 bg-purple-600/20 text-purple-400 rounded text-xs">
+                                                            +{(game.game.genres?.length ?? 0) - 3}
+                                                        </span>
+                                                    {/if}
+                                                </div>
+
+                                                <!-- Description Preview -->
+                                                {#if game.game.description}
+                                                    <p class="text-gray-400 text-xs line-clamp-2 leading-relaxed">
+                                                        {game.game.description}
+                                                    </p>
                                                 {/if}
-                                            </div>
 
-                                            <!-- Description Preview -->
-                                            {#if game.game.description}
-                                                <p class="text-gray-400 text-xs line-clamp-2 leading-relaxed">
-                                                    {game.game.description}
-                                                </p>
-                                            {/if}
-
-                                            <!-- Stats -->
-                                            <div class="flex items-center justify-between pt-2 border-t border-purple-500/20">
-                                                <div class="flex items-center gap-1 text-yellow-400">
-                                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                                                    </svg>
-                                                    <span class="text-xs font-semibold text-white">
-                                                        {formatRating(game.game.global_rating ? parseFloat(game.game.global_rating) : undefined)}
-                                                    </span>
+                                                <!-- Stats -->
+                                                <div class="flex items-center justify-between pt-2 border-t border-purple-500/20">
+                                                    <div class="flex items-center gap-1 text-yellow-400">
+                                                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                                                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                                        </svg>
+                                                        <span class="text-xs font-semibold text-white">
+                                                            {formatRating(game.game.global_rating ? parseFloat(game.game.global_rating) : undefined)}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </a>
                                 {/each}
                             </div>
 

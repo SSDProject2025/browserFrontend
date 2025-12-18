@@ -9,7 +9,7 @@
                 <div class="flex items-center gap-2 mb-4">
                     <span class="text-3xl">🎮</span>
                     <span class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
-					  GameFeed
+					  Fiordispino
 					</span>
                 </div>
                 <p class="text-gray-400 text-sm mb-4">

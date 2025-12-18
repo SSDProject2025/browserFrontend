@@ -12,7 +12,7 @@
             <a href="/" class="flex items-center gap-2 text-white hover:text-purple-400 transition-colors">
                 <span class="text-3xl">🎮</span>
                 <span class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
-            GameFeed
+            Fiordispino
           </span>
             </a>
 

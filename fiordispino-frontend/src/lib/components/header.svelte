@@ -60,7 +60,7 @@
             <div>
                 <a href="/" class="inline-block cursor-pointer hover:opacity-80 transition-opacity">
                     <h1 class="text-4xl font-bold text-white mb-2">
-                        <span class="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">GameFeed</span>
+                        <span class="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">Fiordispino</span>
                     </h1>
                     <p class="text-purple-300">Discover the best video games</p>
                 </a>
