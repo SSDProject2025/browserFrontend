@@ -1,50 +1,41 @@
 <script lang="ts">
-    import {authService} from "$lib/services/auth";
-    import {invalidateAll} from '$app/navigation';
     import {onMount} from "svelte";
-    import type {GameDetails, GenreInfo, User} from "$lib/types/api.types";
+    import type {GameDetails} from "$lib/types/api.types";
     import {gameService} from "$lib/services/game";
     import Header from "$lib/components/header.svelte";
 
     let games = $state<GameDetails[]>([]);
-    let genres = $state<GenreInfo[]>([]);
-    let genreMap = $state<Record<number, string>>({});
     let error = $state(false);
     let loading = $state(true);
+    let isRetrying = $state(false);
 
-    onMount(async () => {
+    const load = async () => {
+        loading = true;
+        error = false;
         try {
             games = await gameService.getAll();
         } catch (err) {
-            loading = false;
-            error = true;
-        }
-
-        try {
-            genres = await gameService.getGenres().catch(() => []);
-            genreMap = {};
-            for (const g of genres) {
-                genreMap[g.id] = g.name;
-            }
-        } catch (err) {
-            loading = false;
+            console.error(err);
             error = true;
         } finally {
             loading = false;
+            isRetrying = false;
         }
-    });
-
-    let isRetrying = $state(false);
+    };
 
     async function handleRetry() {
         isRetrying = true;
-        await invalidateAll(); // Riesegue la load() in +page.ts
-        isRetrying = false;
+        await load();
     }
 
-    function formatRating(rating: number | undefined): string {
-        return rating ? rating.toFixed(1) : 'N/A';
+    function formatRating(ratingStr: string | undefined): string {
+        const r = parseFloat(ratingStr || "0");
+        return r > 0 ? r.toFixed(1) : "N/A";
     }
+
+    onMount(() => {
+        load();
+    });
 </script>
 
 <Header/>
@@ -96,19 +87,17 @@
                                                     <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                     </svg>
-                                                    <span class="text-yellow-400 font-semibold">{formatRating(parseFloat(games[0].global_rating))}</span>
+                                                    <span class="text-yellow-400 font-semibold">{formatRating(games[0].global_rating)}</span>
                                                     <span class="text-gray-400 text-xs">({games[0].rating_count})</span>
                                                 </div>
                                             {/if}
 
                                             <!-- Genres -->
                                             <div class="flex gap-2">
-                                                {#each games[0].genres.slice(0, 3) as genreId}
-                                                    {#if genreMap[genreId]}
-                                                        <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-medium">
-                                                            {genreMap[genreId]}
-                                                        </span>
-                                                    {/if}
+                                                {#each games[0].genres.slice(0, 3) as genre}
+                                                    <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-medium">
+                                                        {genre.name}
+                                                    </span>
                                                 {/each}
                                             </div>
 
@@ -136,6 +125,7 @@
                             <img
                                     src="data:image/jpg;base64,{game.box_art}"
                                     alt={game.title}
+                                    loading="lazy"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent">
@@ -153,17 +143,15 @@
                                                 <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
-                                                <span class="text-yellow-400 font-semibold text-sm">{formatRating(parseFloat(game.global_rating))}</span>
+                                                <span class="text-yellow-400 font-semibold text-sm">{formatRating(game.global_rating)}</span>
                                             </div>
                                         {/if}
 
                                         <!-- Genres -->
-                                        {#each game.genres.slice(0, 2) as genreId}
-                                            {#if genreMap[genreId]}
-                                                <span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full text-xs">
-                                                    {genreMap[genreId]}
-                                                </span>
-                                            {/if}
+                                        {#each game.genres.slice(0, 2) as genre}
+                                            <span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full text-xs">
+                                                {genre.name}
+                                            </span>
                                         {/each}
 
                                         <!-- PEGI -->
@@ -184,6 +172,7 @@
                             <img
                                     src="data:image/jpg;base64,{game.box_art}"
                                     alt={game.title}
+                                    loading="lazy"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
                             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent">
@@ -198,14 +187,14 @@
                                                 <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
-                                                <span class="text-yellow-400 font-semibold text-xs">{formatRating(parseFloat(game.global_rating))}</span>
+                                                <span class="text-yellow-400 font-semibold text-xs">{formatRating(game.global_rating)}</span>
                                             </div>
                                         {/if}
 
                                         <!-- First Genre -->
-                                        {#if game.genres[0] && genreMap[game.genres[0]]}
+                                        {#if game.genres[0]}
                                             <span class="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full text-xs">
-                                                {genreMap[game.genres[0]]}
+                                                {game.genres[0].name}
                                             </span>
                                         {/if}
 

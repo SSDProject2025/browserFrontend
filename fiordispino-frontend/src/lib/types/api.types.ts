@@ -33,7 +33,7 @@ export interface GameDetails {
     box_art: string;
     description: string;
     title: string;
-    genres: number[];
+    genres: GenreInfo[];
     pegi: number;
     release_date: string;
     global_rating: string;

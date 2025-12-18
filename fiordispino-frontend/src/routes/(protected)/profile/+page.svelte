@@ -43,8 +43,6 @@
     let userObject: User;
     let playedGames: Game[] = [];
     let toPlayGames: Game[] = [];
-    let genres: GenreInfo[] = [];
-    let genreMap: Record<number, string> = {};
 
     onMount(async () => {
         try {
@@ -60,13 +58,6 @@
             const toPlayResp = await libraryService.getGamesToPlayFromUsername(userObject.username).catch(() => []);
             toPlayGames = toPlayResp.map((item: any) => item);
 
-            genres = await gameService.getGenres().catch(() => []);
-
-            // Build genre map
-            genreMap = {};
-            for (const g of genres) {
-                genreMap[g.id] = g.name;
-            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -173,6 +164,7 @@
                                             <img
                                                     src={"data:image/png;base64," + game.game.box_art}
                                                     alt={game.game.title}
+                                                    loading="lazy"
                                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                             />
                                             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
@@ -209,11 +201,12 @@
 
                                             <!-- Genres -->
                                             <div class="flex flex-wrap gap-1">
-                                                {#each (game.game.genres ?? []).slice(0, 3) as genreId}
+                                                {#each (game.game.genres ?? []).slice(0, 3) as genre}
                                                     <span class="px-2 py-1 bg-purple-600/30 text-purple-300 rounded text-xs font-medium">
-                                                        {genreMap[genreId] ?? 'Unknown'}
+                                                        {typeof genre === 'object' ? genre.name : genre}
                                                     </span>
                                                 {/each}
+
                                                 {#if (game.game.genres?.length ?? 0) > 3}
                                                     <span class="px-2 py-1 bg-purple-600/20 text-purple-400 rounded text-xs">
                                                         +{(game.game.genres?.length ?? 0) - 3}

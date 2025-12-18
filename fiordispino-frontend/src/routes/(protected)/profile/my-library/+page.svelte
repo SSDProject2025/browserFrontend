@@ -16,8 +16,6 @@
 
     let playedGames: Game[] = [];
     let toPlayGames: Game[] = [];
-    let genres: GenreInfo[] = [];
-    let genreMap: Record<number, string> = {};
 
     onMount(async () => {
         await authService.getUser().then(async (user) => {
@@ -26,13 +24,6 @@
 
             const toPlayResp = await libraryService.getGamesToPlayFromUsername(user.username).catch(() => []);
             toPlayGames = toPlayResp.map((item: any) => item);
-
-            genres = await gameService.getGenres().catch(() => []);
-
-            genreMap = {};
-            for (const g of genres) {
-                genreMap[g.id] = g.name;
-            }
 
         }).finally(() => loading = false);
     });
@@ -92,7 +83,6 @@
     $: currentGames = selectedCollection === 'to-play' ? toPlayGames : playedGames;
     $: filteredGames = filterGames(currentGames, searchQuery);
     $: sortedGames = sortGames(filteredGames, sortBy);
-    $: genreMap = Object.fromEntries(genres.map(g => [g.id, g.name]));
     $: collectionColor = selectedCollection === 'to-play' ? 'from-blue-600 to-cyan-600' : 'from-green-600 to-emerald-600';
     $: collectionIcon = selectedCollection === 'to-play' ? '📚' : '✅';
     $: collectionName = selectedCollection === 'to-play' ? 'To Play' : 'Played';
@@ -242,9 +232,9 @@
 
                             <!-- Genres -->
                             <div class="flex flex-wrap gap-1">
-                                {#each (game.game.genres ?? []).slice(0, 3) as genreId}
+                                {#each (game.game.genres ?? []).slice(0, 3) as genre}
                                     <span class="px-2 py-1 bg-purple-600/30 text-purple-300 rounded text-xs font-medium">
-                                        {genreMap[genreId] ?? 'Unknown'}
+                                        {typeof genre === 'object' ? genre.name : genre}
                                     </span>
                                 {/each}
                                 {#if (game.game.genres?.length ?? 0) > 3}
@@ -325,9 +315,9 @@
 
                                     <!-- Genres -->
                                     <div class="flex flex-wrap gap-2">
-                                        {#each (game.game.genres ?? []) as genreId}
+                                        {#each (game.game.genres ?? []) as genre}
                                             <span class="px-3 py-1 bg-purple-600/30 text-purple-300 rounded-full text-xs font-medium">
-                                                {genreMap[genreId] ?? 'Unknown'}
+                                                {typeof genre === 'object' ? genre.name : genre}
                                             </span>
                                         {/each}
                                     </div>

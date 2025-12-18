@@ -2,6 +2,7 @@ import { ApiClient } from "./api"
 import { AuthTokenHandler } from "$lib/services/authTokenHandler";
 import type {Game, LoginUserRequest, RegisterUserRequest, TokenResponse, User} from "$lib/types/api.types";
 import {AxiosError} from "axios";
+import {goto} from "$app/navigation";
 
 export class AuthService {
 
@@ -66,6 +67,7 @@ export class AuthService {
                         action: 'logout'
                     })
                 });
+                await goto("/")
             });
         }
     }
