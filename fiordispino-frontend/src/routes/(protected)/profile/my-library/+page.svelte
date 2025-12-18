@@ -190,34 +190,35 @@
         {:else if viewMode === 'grid'}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {#each sortedGames as game}
-                    <div class="bg-slate-900/50 rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer group">
-                        <!-- Box Art -->
-                        <div class="aspect-[3/4] overflow-hidden relative">
-                            <img
-                                    src={"data:image/png;base64," + game.game.box_art}
-                                    alt={game.game.title}
-                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div class="absolute bottom-0 left-0 right-0 p-3 space-y-2">
-                                    <div class="flex items-center justify-between text-xs text-white">
-                                        <span class="flex items-center gap-1">
-                                            <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-                                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                                            </svg>
-                                            {formatRating(game.game.global_rating)}
-                                        </span>
-                                        <span class="text-gray-300">
-                                            {game.game.rating_count} reviews
-                                        </span>
+                    <a href="/{game.game.id}">
+                        <div class="bg-slate-900/50 rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all hover:scale-105 cursor-pointer group">
+                            <!-- Box Art -->
+                            <div class="aspect-[3/4] overflow-hidden relative">
+                                <img
+                                        src={"data:image/png;base64," + game.game.box_art}
+                                        alt={game.game.title}
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="absolute bottom-0 left-0 right-0 p-3 space-y-2">
+                                        <div class="flex items-center justify-between text-xs text-white">
+                                            <span class="flex items-center gap-1">
+                                                <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                                </svg>
+                                                {formatRating(game.game.global_rating)}
+                                            </span>
+                                            <span class="text-gray-300">
+                                                {game.game.rating_count} reviews
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
+                                <!-- PEGI Badge -->
+                                <div class="absolute top-2 right-2 {getPegiColor(game.game.pegi)} text-white text-xs font-bold px-2 py-1 rounded">
+                                    {getPegiLabel(game.game.pegi)}
+                                </div>
                             </div>
-                            <!-- PEGI Badge -->
-                            <div class="absolute top-2 right-2 {getPegiColor(game.game.pegi)} text-white text-xs font-bold px-2 py-1 rounded">
-                                {getPegiLabel(game.game.pegi)}
-                            </div>
-                        </div>
 
                         <!-- Game Info -->
                         <div class="p-4 space-y-3">
@@ -325,9 +326,11 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex items-center gap-3 mt-4 pt-4 border-t border-purple-500/20">
-                                    <button class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition-all">
-                                        View Details
-                                    </button>
+                                    <a href="/{game.game.id}">
+                                        <button class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition-all">
+                                            View Details
+                                        </button>
+                                    </a>
                                     <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold rounded-lg transition-all">
                                         {selectedCollection === 'to-play' ? 'Mark as Played' : 'Move to Backlog'}
                                     </button>
